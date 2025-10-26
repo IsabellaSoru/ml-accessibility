@@ -1,0 +1,11 @@
+numpy
+pandas
+scikit-learn
+torch
+torchvision
+transformers
+beautifulsoup4
+readability-lxml
+requests
+tqdm
+matplotlib

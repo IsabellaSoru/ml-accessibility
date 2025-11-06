@@ -1,1 +1,4 @@
 page_url,img_src,role,alt_text,label
+https://www.unibo.it,https://www.unibo.it/img/logo-unibo.svg,presentation,,decorative
+https://www.unibo.it,https://www.unibo.it/img/hero.jpg,img,"Università di Bologna",informative
+https://www.unibo.it,https://www.unibo.it/img/photo-campus.jpg,img,"",informative

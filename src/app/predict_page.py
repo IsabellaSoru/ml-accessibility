@@ -23,8 +23,23 @@ def fetch_html(url: str) -> str:
     resp.raise_for_status()
     return resp.text
 
-def parse_dom(html: str) -> BeautifulSoup:
-    return BeautifulSoup(html, "html.parser")
+def parse_dom(html: str):
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    # rimuovi elementi inutili per la leggibilità
+    for tag in soup(["script","style","noscript","svg","meta","link","iframe"]):
+        tag.decompose()
+    # elimina blocchi tipici di navigazione/legali
+    selectors = [
+        "nav","header","footer",
+        ".cookie",".cookies",".gdpr",".consent",".banner",
+        ".breadcrumb",".menu",".navbar",".offcanvas",
+        ".newsletter",".modal",".social",".credits",".legal",".policy",".privacy",".cookie-policy"
+    ]
+    for sel in selectors:
+        for el in soup.select(sel):
+            el.decompose()
+    return soup
 
 # ---------- IMAGES ----------
 def extract_images(soup: BeautifulSoup, base_url: str):
@@ -83,21 +98,37 @@ def extract_links(soup: BeautifulSoup, base_url: str):
     return links
 
 def evaluate_links_baseline(links):
-    """
-    Regola semplice:
-    - Link generico se anchor è in stop-list o ha < 2 parole significative.
-    """
+    def is_contact(href, text):
+        t = (text or "").lower()
+        h = (href or "").lower()
+        return h.startswith("tel:") or h.startswith("mailto:") or "@" in h or "@" in t
+
+    def is_lang_switch(text):
+        t = (text or "").strip().lower()
+        return t in {"it","ita","en","eng","de","fr","es"}
+
     generic = []
-    total = len(links)
+    seen = set()
+    total = 0
     for lk in links:
         txt = lk["anchor_text"]
+        href = lk["href"]
+        key = (txt, href)
+        if key in seen:  # de-duplica
+            continue
+        seen.add(key)
+        total += 1
+
         tokens = [t for t in txt.split() if t.isalpha()]
+        # esenzioni: lingua/contatti/icone vuote
+        if is_lang_switch(txt) or is_contact(href, txt) or txt == "":
+            continue
+
         is_generic = (txt in GENERIC_LINKS) or (len(tokens) < 2)
         if is_generic:
-            generic.append({"text": txt, "href": lk["href"]})
-    score = 1.0
-    if total > 0:
-        score = max(0.0, 1.0 - (len(generic) / total))
+            generic.append({"text": txt, "href": href})
+
+    score = 1.0 if total == 0 else max(0.0, 1.0 - (len(generic) / total))
     return {"score": round(score, 2), "generic_links": generic, "total": total}
 
 # ---------- READABILITY ----------

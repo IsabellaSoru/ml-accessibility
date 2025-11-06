@@ -1,1 +1,4 @@
 page_url,xpath_or_id,text,label
+https://www.unibo.it,node-1,"L’Università di Bologna è una delle più antiche del mondo, fondata nel 1088.",easy
+https://www.unibo.it,node-2,"L’Ateneo promuove la ricerca interdisciplinare, l’innovazione e la formazione di alto livello.",medium
+https://www.unibo.it,node-3,"Le attività accademiche e amministrative richiedono l’adozione di strumenti conformi alle normative europee in materia di accessibilità e trasparenza.",difficult
